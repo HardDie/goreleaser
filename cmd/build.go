@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/HardDie/goreleaser/internal/common"
+	"github.com/HardDie/goreleaser/internal/linux"
 	"github.com/HardDie/goreleaser/internal/logger"
 	"github.com/HardDie/goreleaser/internal/utils"
 	"github.com/HardDie/goreleaser/internal/windows"
@@ -50,7 +51,14 @@ var buildCmd = &cobra.Command{
 			}
 		}
 
+		// Build windows
 		err = windows.Build(flagName, flagImage, flagVersion, flagLicense, flagPath)
+		if err != nil {
+			logger.Error.Fatal(err)
+		}
+
+		// Build linux
+		err = linux.Build(flagName, flagImage, flagVersion, flagLicense, flagPath)
 		if err != nil {
 			logger.Error.Fatal(err)
 		}
