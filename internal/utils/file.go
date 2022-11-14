@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 
@@ -94,6 +95,39 @@ func RemoveFile(file string) error {
 	if err != nil {
 		logger.Error.Println(err)
 		return fmt.Errorf("error deleting file %s: %w", file, err)
+	}
+	return nil
+}
+
+func CopyFile(srcFile, dstFile string) error {
+	sourceFileStat, err := os.Stat(srcFile)
+	if err != nil {
+		logger.Error.Println(err)
+		return fmt.Errorf("error at get stats of source file %s for copy: %w", srcFile, err)
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return fmt.Errorf("%s is not a regular file", srcFile)
+	}
+
+	source, err := os.Open(srcFile)
+	if err != nil {
+		logger.Error.Println(err)
+		return fmt.Errorf("error at open source file %s for copy: %w", srcFile, err)
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dstFile)
+	if err != nil {
+		logger.Error.Println(err)
+		return fmt.Errorf("error at creation destination file %s for copy: %w", dstFile, err)
+	}
+	defer destination.Close()
+
+	_, err = io.Copy(destination, source)
+	if err != nil {
+		logger.Error.Println(err)
+		return fmt.Errorf("error at copy data from %s to %s: %w", srcFile, dstFile, err)
 	}
 	return nil
 }

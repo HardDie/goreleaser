@@ -14,7 +14,7 @@ import (
 	goversioninfoCmd "github.com/HardDie/goversioninfo/cmd"
 )
 
-func Build(name, imagePath, version, license, path string) error {
+func Build(name, imagePath, version, license, path, company string) error {
 	// Convert image to windows icon
 	err := image.ConvertToWindowsIcon(imagePath, "build_cache/win_icon.ico")
 	if err != nil {
@@ -44,15 +44,15 @@ func Build(name, imagePath, version, license, path string) error {
 		FlagIcon:    utils.Allocate("../../build_cache/win_icon.ico"),
 		Flag64:      utils.Allocate(true),
 
-		FlagVerMajor: utils.Allocate(major),
-		FlagVerMinor: utils.Allocate(minor),
-		FlagVerPatch: utils.Allocate(patch),
-		FlagVerBuild: utils.Allocate(build),
+		FlagVerMajor: &major,
+		FlagVerMinor: &minor,
+		FlagVerPatch: &patch,
+		FlagVerBuild: &build,
 
-		FlagProductVerMajor: utils.Allocate(major),
-		FlagProductVerMinor: utils.Allocate(minor),
-		FlagProductVerPatch: utils.Allocate(patch),
-		FlagProductVerBuild: utils.Allocate(build),
+		FlagProductVerMajor: &major,
+		FlagProductVerMinor: &minor,
+		FlagProductVerPatch: &patch,
+		FlagProductVerBuild: &build,
 
 		FlagExample:          utils.Allocate(false),
 		FlagGo:               utils.Allocate(""),
@@ -61,16 +61,16 @@ func Build(name, imagePath, version, license, path string) error {
 		FlagSkipVersion:      utils.Allocate(true),
 
 		FlagComment:        utils.Allocate(""),
-		FlagCompany:        utils.Allocate(""),
+		FlagCompany:        &company,
 		FlagDescription:    utils.Allocate(""),
-		FlagFileVersion:    utils.Allocate(version),
-		FlagInternalName:   utils.Allocate(name),
-		FlagCopyright:      utils.Allocate(license),
+		FlagFileVersion:    &version,
+		FlagInternalName:   &name,
+		FlagCopyright:      &license,
 		FlagTrademark:      utils.Allocate(""),
-		FlagOriginalName:   utils.Allocate(name),
+		FlagOriginalName:   &name,
 		FlagPrivateBuild:   utils.Allocate(""),
-		FlagProductName:    utils.Allocate(name),
-		FlagProductVersion: utils.Allocate(version),
+		FlagProductName:    &name,
+		FlagProductVersion: &version,
 		FlagSpecialBuild:   utils.Allocate(""),
 
 		FlagTranslation: utils.Allocate(int(goversioninfo.LngUSEnglish)),

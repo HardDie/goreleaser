@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/HardDie/goreleaser/internal/common"
+	"github.com/HardDie/goreleaser/internal/darwin"
 	"github.com/HardDie/goreleaser/internal/linux"
 	"github.com/HardDie/goreleaser/internal/logger"
 	"github.com/HardDie/goreleaser/internal/utils"
@@ -22,6 +23,7 @@ var buildCmd = &cobra.Command{
 		flagImage := cmd.Flag("image").Value.String()
 		flagVersion := cmd.Flag("version").Value.String()
 		flagLicense := cmd.Flag("license").Value.String()
+		flagCompany := cmd.Flag("company").Value.String()
 
 		// Valiate flags
 		if !utils.IsFileExist(flagPath) {
@@ -52,13 +54,19 @@ var buildCmd = &cobra.Command{
 		}
 
 		// Build windows
-		err = windows.Build(flagName, flagImage, flagVersion, flagLicense, flagPath)
+		err = windows.Build(flagName, flagImage, flagVersion, flagLicense, flagPath, flagCompany)
 		if err != nil {
 			logger.Error.Fatal(err)
 		}
 
 		// Build linux
 		err = linux.Build(flagName, flagImage, flagVersion, flagLicense, flagPath)
+		if err != nil {
+			logger.Error.Fatal(err)
+		}
+
+		// Build darwin
+		err = darwin.Build(flagName, flagImage, flagVersion, flagLicense, flagPath, flagCompany)
 		if err != nil {
 			logger.Error.Fatal(err)
 		}
@@ -78,5 +86,6 @@ func init() {
 	buildCmd.Flags().StringP("name", "n", "", "Name of the result application")
 	buildCmd.Flags().StringP("image", "i", "", "Path to the application image")
 	buildCmd.Flags().StringP("version", "v", "v0.0.0", "Version of the result application")
-	buildCmd.Flags().StringP("license", "l", "", "License of the result application")
+	buildCmd.Flags().StringP("license", "l", "", "License of the result application (ex. GPLv3)")
+	buildCmd.Flags().StringP("company", "c", "", "Name of the company (ex. org.company.app)")
 }
