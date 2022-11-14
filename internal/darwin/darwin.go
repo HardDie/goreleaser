@@ -37,7 +37,7 @@ type Info struct {
 	Company string
 }
 
-func Build(name, imagePath, version, license, path, company string) error {
+func Build(name, imagePath, version, license, path, company, ldflags string) error {
 	err := image.ConvertToDarwinIconsContainer(imagePath, filepath.Join("build_cache", "icon.icns"))
 	if err != nil {
 		return err
@@ -64,6 +64,9 @@ func Build(name, imagePath, version, license, path, company string) error {
 
 		// Compile app
 		cmd := exec.Command("go", "build", "-a", "-o", filepath.Join(buildCacheDirectory, name), entryPointFile)
+		if ldflags != "" {
+			cmd.Args = append(cmd.Args, "-ldflags", ldflags)
+		}
 		cmd.Env = os.Environ()
 		cmd.Env = append(cmd.Env, "CGO_ENABLED=0")
 		cmd.Env = append(cmd.Env, "GOARCH="+arch)

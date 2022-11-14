@@ -14,7 +14,7 @@ import (
 	goversioninfoCmd "github.com/HardDie/goversioninfo/cmd"
 )
 
-func Build(name, imagePath, version, license, path, company string) error {
+func Build(name, imagePath, version, license, path, company, ldflags string) error {
 	// Convert image to windows icon
 	err := image.ConvertToWindowsIcon(imagePath, "build_cache/win_icon.ico")
 	if err != nil {
@@ -83,6 +83,9 @@ func Build(name, imagePath, version, license, path, company string) error {
 	for _, arch := range arches {
 		// Compile app
 		cmd := exec.Command("go", "build", "-a", "-o", name+".exe", ".")
+		if ldflags != "" {
+			cmd.Args = append(cmd.Args, "-ldflags", ldflags)
+		}
 		cmd.Env = os.Environ()
 		cmd.Env = append(cmd.Env, "CGO_ENABLED=0")
 		cmd.Env = append(cmd.Env, "GOARCH="+arch)

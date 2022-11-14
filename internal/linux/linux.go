@@ -10,7 +10,7 @@ import (
 	"github.com/HardDie/goreleaser/internal/utils"
 )
 
-func Build(name, imagePath, version, license, path string) error {
+func Build(name, imagePath, version, license, path, ldflags string) error {
 	newWorkDirectory := filepath.Dir(path)
 	entryPointFile := filepath.Base(path)
 
@@ -29,6 +29,9 @@ func Build(name, imagePath, version, license, path string) error {
 	for _, arch := range arches {
 		// Compile app
 		cmd := exec.Command("go", "build", "-a", "-o", name, entryPointFile)
+		if ldflags != "" {
+			cmd.Args = append(cmd.Args, "-ldflags", ldflags)
+		}
 		cmd.Env = os.Environ()
 		cmd.Env = append(cmd.Env, "CGO_ENABLED=0")
 		cmd.Env = append(cmd.Env, "GOARCH="+arch)
