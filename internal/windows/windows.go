@@ -2,7 +2,6 @@ package windows
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
