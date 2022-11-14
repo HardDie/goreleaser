@@ -3,7 +3,6 @@ package darwin
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -46,8 +45,6 @@ func Build(name, imagePath, version, license, path, company, ldflags string) err
 	newWorkDirectory, _ := filepath.Abs(filepath.Dir(path))
 	entryPointFile := filepath.Base(path)
 
-	log.Println("work:", newWorkDirectory)
-
 	currentDirBackup, err := os.Getwd()
 	if err != nil {
 		logger.Error.Println(err)
@@ -63,10 +60,11 @@ func Build(name, imagePath, version, license, path, company, ldflags string) err
 		}
 
 		// Compile app
-		cmd := exec.Command("go", "build", "-a", "-o", filepath.Join(buildCacheDirectory, name), entryPointFile)
+		cmd := exec.Command("go", "build", "-a", "-o", filepath.Join(buildCacheDirectory, name))
 		if ldflags != "" {
 			cmd.Args = append(cmd.Args, "-ldflags", ldflags)
 		}
+		cmd.Args = append(cmd.Args, entryPointFile)
 		cmd.Env = os.Environ()
 		cmd.Env = append(cmd.Env, "CGO_ENABLED=0")
 		cmd.Env = append(cmd.Env, "GOARCH="+arch)

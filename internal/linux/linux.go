@@ -28,10 +28,11 @@ func Build(name, imagePath, version, license, path, ldflags string) error {
 	arches := []string{"amd64", "386", "arm64"}
 	for _, arch := range arches {
 		// Compile app
-		cmd := exec.Command("go", "build", "-a", "-o", name, entryPointFile)
+		cmd := exec.Command("go", "build", "-a", "-o", name)
 		if ldflags != "" {
 			cmd.Args = append(cmd.Args, "-ldflags", ldflags)
 		}
+		cmd.Args = append(cmd.Args, entryPointFile)
 		cmd.Env = os.Environ()
 		cmd.Env = append(cmd.Env, "CGO_ENABLED=0")
 		cmd.Env = append(cmd.Env, "GOARCH="+arch)
@@ -44,7 +45,7 @@ func Build(name, imagePath, version, license, path, ldflags string) error {
 		}
 
 		// Create tar archive
-		cmd = exec.Command("tar", "-czf", "../../release/"+name+".linux-"+arch+".tar.gz", name)
+		cmd = exec.Command("tar", "-czf", filepath.Join(currentDirBackup, "release", name+".linux-"+arch+".tar.gz"), name)
 		logger.Debug.Println("Execute:", cmd.String())
 		err = cmd.Run()
 		if err != nil {

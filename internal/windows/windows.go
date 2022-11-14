@@ -2,6 +2,7 @@ package windows
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,18 +16,18 @@ import (
 )
 
 func Build(name, imagePath, version, license, path, company, ldflags string) error {
-	// Convert image to windows icon
-	err := image.ConvertToWindowsIcon(imagePath, "build_cache/win_icon.ico")
-	if err != nil {
-		return err
-	}
-
 	newWorkDirectory := filepath.Dir(path)
 
 	currentDirBackup, err := os.Getwd()
 	if err != nil {
 		logger.Error.Println(err)
 		return fmt.Errorf("error get work directory: %w", err)
+	}
+
+	// Convert image to windows icon
+	err = image.ConvertToWindowsIcon(imagePath, filepath.Join(currentDirBackup, "build_cache", "win_icon.ico"))
+	if err != nil {
+		return err
 	}
 
 	err = os.Chdir(newWorkDirectory)
@@ -41,7 +42,7 @@ func Build(name, imagePath, version, license, path, company, ldflags string) err
 	goversioninfoCmd.Cmd(goversioninfoCmd.Arguments{
 		FlagOut:     utils.Allocate("resource.syso"),
 		FlagPackage: utils.Allocate("main"),
-		FlagIcon:    utils.Allocate("../../build_cache/win_icon.ico"),
+		FlagIcon:    utils.Allocate(filepath.Join(currentDirBackup, "build_cache", "win_icon.ico")),
 		Flag64:      utils.Allocate(true),
 
 		FlagVerMajor: &major,
@@ -82,10 +83,11 @@ func Build(name, imagePath, version, license, path, company, ldflags string) err
 	arches := []string{"amd64", "386", "arm64"}
 	for _, arch := range arches {
 		// Compile app
-		cmd := exec.Command("go", "build", "-a", "-o", name+".exe", ".")
+		cmd := exec.Command("go", "build", "-a", "-o", name+".exe")
 		if ldflags != "" {
 			cmd.Args = append(cmd.Args, "-ldflags", ldflags)
 		}
+		cmd.Args = append(cmd.Args, ".")
 		cmd.Env = os.Environ()
 		cmd.Env = append(cmd.Env, "CGO_ENABLED=0")
 		cmd.Env = append(cmd.Env, "GOARCH="+arch)
@@ -98,7 +100,7 @@ func Build(name, imagePath, version, license, path, company, ldflags string) err
 		}
 
 		// Create zip archive
-		cmd = exec.Command("zip", "../../release/"+name+".windows-"+arch+".zip", name+".exe")
+		cmd = exec.Command("zip", filepath.Join(currentDirBackup, "release", name+".windows-"+arch+".zip"), name+".exe")
 		logger.Debug.Println("Execute:", cmd.String())
 		err = cmd.Run()
 		if err != nil {
